@@ -453,6 +453,27 @@ nyxmael/nyxgate:1.0.0
 
 ---
 
+## Supported Distributions
+
+NyxGate has been tested and is supported on the following systems:
+
+### Ubuntu
+
+- Ubuntu 22.04.5 LTS
+- Ubuntu 24.04.4 LTS
+- Ubuntu 25.04
+
+### Debian
+
+- Debian GNU/Linux 12 (bookworm)
+- Debian GNU/Linux 13 (trixie)
+
+### RHEL
+
+- RHEL 10
+
+---
+
 ## System Requirements
 
 - 2 CPU minimum
