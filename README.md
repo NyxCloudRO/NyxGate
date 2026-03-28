@@ -493,3 +493,21 @@ NyxGate is designed around a practical operations model:
 - give operators a product they can navigate quickly under pressure
 
 The result is a platform focused on clarity, actionability, and operational control rather than raw data volume alone.
+
+---
+
+## Support the Project
+
+If you find NyxGate useful and want to support its development, you can do so here:
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Support-Buy%20Me%20a%20Coffee-orange?style=for-the-badge&logo=buymeacoffee)](https://buymeacoffee.com/nyxmael)
+
+Your support helps maintain and improve the platform.
+
+---
+
+## Official Website
+
+For more information, updates, and future developments:
+
+[![NyxCloud](https://img.shields.io/badge/Visit-NyxCloud-blue?style=for-the-badge&logo=cloudflare)](https://nyxcloud.ro/)
