@@ -2,113 +2,413 @@
 
 ## Overview
 
-NyxGate is a Unified Security & Endpoint Management platform designed to give operators centralized control, visibility, and automated threat response across managed systems.
+NyxGate is a unified security and endpoint management platform built to give operators one control plane for host visibility, threat detection, response, and day-to-day security operations.
 
-It is positioned as:
+In practice, NyxGate combines:
 
-- a centralized security control plane
-- an endpoint visibility platform
-- an automated threat prevention system
+- fleet inventory and host lifecycle management
+- live host telemetry and network visibility
+- threat detection and prevention controls
+- firewall posture and policy operations
+- patch visibility and patch execution
+- audited remote terminal access
 
-NyxGate brings host awareness, threat detection, prevention policy, and operator response into a single operational surface. Instead of splitting endpoint visibility, security actions, and platform access across multiple disconnected tools, NyxGate gives teams one place to monitor managed systems, detect hostile activity, and take immediate action with confidence.
-
----
-
-## Core Capabilities
-
-### Endpoint Visibility
-
-NyxGate provides centralized monitoring across managed hosts so operators can work from a unified, current view of their environment.
-
-The platform is built to surface:
-
-- centralized monitoring of hosts
-- system-level visibility
-- real-time host context such as CPU, memory, and active system activity
-
-This allows teams to move quickly from high-level fleet awareness to host-specific understanding without losing operational continuity.
+The platform is designed so an operator can move from fleet overview, to a suspicious host, to the exact process, service, connection, or response action without leaving the product.
 
 ---
 
-### Threat Detection
+## What NyxGate Covers
 
-NyxGate continuously helps identify common and high-impact threat behaviors across managed systems.
+NyxGate is organized around a set of operator-facing workspaces:
 
-Detection coverage includes:
+- `Overview` for posture, attention items, and current operational priorities
+- `Network` for topology and grouped network relationships
+- `Agents` for endpoint inventory, enrollment, upgrade, restart, revoke, uninstall, isolation, and removal actions
+- `Threats` for detections, prevention rules, blocked entities, and host isolation
+- `Traffic` for grouped traffic review across hosts, processes, destinations, and exceptions
+- `Monitoring` for fleet telemetry and host-level operational visibility
+- `Risk` for ranked host prioritization with recommended actions
+- `Insights` for plain-language threat narratives built from related activity
+- `Firewall` for exposure review, policy management, and host firewall actions
+- `Patching` for patch status, package deltas, update execution, and reboot actions
+- `Terminal` for audited remote shell access to online hosts
+- `Settings` for platform configuration, retention controls, users, roles, and audit review
 
-- SSH brute force detection
-- port scan detection
-- reverse shell detection
-- crypto miner detection
+This means "endpoint management" in NyxGate is not limited to inventory. It includes enrolling hosts, observing their operational state, applying security policy, patching them, isolating them when necessary, and opening a remote shell session when direct investigation is required.
+
+---
+
+## Endpoint Visibility
+
+NyxGate gives operators both fleet-wide and host-specific context.
+
+Across the platform, operators can review:
+
+- host inventory with hostname, IP address, operating system, agent version, uptime, and last-seen status
+- online, degraded, isolated, and upgrade-available host states
+- host telemetry including CPU usage, memory pressure, active connection counts, and network throughput
+- grouped network flows between managed hosts and remote destinations
+- observed listening services and exposed ports
+- process activity associated with network behavior
+- recent alerts, L7 activity, and connection context on an individual host
+
+The host investigation experience is especially detailed. For a selected host, NyxGate presents:
+
+- host identity and current status
+- CPU, memory, and network timelines
+- risk score and risk breakdown
+- active processes tied to observed network activity
+- listening services
+- grouped outbound and remote connection paths
+- recent alerts and L7 activity
+- patch status and last patch scan
+
+This lets operators pivot from a fleet-level signal into a host-level evidence view without switching tools.
+
+---
+
+## Threat Detection
+
+NyxGate implements concrete threat detection and prevention coverage rather than a generic alert feed.
+
+The product includes detection support for:
+
+- SSH brute force activity
+- exposed service brute force activity
+- port scanning
+- reverse shell behavior
+- crypto miner activity
 - suspicious DNS activity
-- threat intelligence matching
+- threat intelligence matches
 
-This detection model is designed for practical security operations: focusing attention on hostile patterns that matter, reducing investigative delay, and improving operator response speed.
+These detections surface in multiple places depending on workflow:
 
----
+- the `Threats` workspace for correlated attack sessions and prevention activity
+- the `Risk` queue when a host accumulates security, exposure, or patch-driven risk
+- the `Insights` workspace when related detections, process activity, and network behavior are grouped into a plain-language story
+- the `Monitoring` and `Host Investigation` views when operators need host context around a signal
 
-### Automated Response
-
-NyxGate supports immediate security action when conditions require active enforcement.
-
-Available response actions include:
-
-- Block IP
-- Kill process
-- Block domain
-
-The platform is designed around:
-
-- automated enforcement
-- real-time response
-- severity-based actions
-
-This helps teams shift from passive visibility to active protection, with actions aligned to the seriousness of the detected event and the prevention rules configured by the operator.
+NyxGate does not only show raw events. It also groups related detections into investigation lanes so operators can work from a higher-signal view of what is happening.
 
 ---
 
-### Prevention Rules Engine
+## Automated Response
 
-NyxGate includes a Prevention Rules engine that allows operators to define, manage, and tune enforcement behavior with clarity.
+NyxGate supports direct operator response and automated enforcement behaviors tied to prevention logic.
 
-The engine is built around:
+Available response actions in the product include:
 
-- a rule-based system
-- thresholds and triggers
-- severity levels
-- templates
-- per-rule enable, disable, and edit controls
+- block an IP address
+- block a domain
+- kill a process
+- isolate a host
+- restore an isolated host
+- unblock blocked entities
+- extend block duration
 
-This gives security teams a consistent way to express how the platform should react to specific conditions, while keeping rule management understandable and operationally practical.
+These actions appear in the places where operators need them:
 
----
+- from the `Threats` workspace while reviewing prevention events and blocked entities
+- from the `Firewall` workspace while managing host posture or exposure
+- from the `Overview` workspace when attention items suggest immediate action
+- from host-focused workflows such as `Agents`, `Risk`, and `Host Investigation`
 
-### Security & Access Control
-
-NyxGate starts from a secure bootstrap model so platform access is controlled from the first interaction.
-
-The platform includes:
-
-- enforced MFA at setup
-- backup codes system
-- secure bootstrap process
-- controlled access to platform
-
-This creates a safer operational baseline and helps ensure the management layer itself is protected before routine usage begins.
+NyxGate also tracks blocked IPs and blocked domains as managed entities, with views for active blocks, expiration, scope, and cleanup actions.
 
 ---
 
-### Unified Control Interface
+## Prevention Rules Engine
 
-NyxGate is designed as a single interface for both security operations and endpoint management.
+NyxGate includes a real prevention rules engine with editable live rules and reusable templates.
 
-The user experience emphasizes:
+Operators can work with:
 
-- a unified interface for security and endpoint management
-- a clean and operator-focused UI
-- fast navigation and clarity
+- live prevention rules
+- built-in rule templates
+- custom saved templates
+- enabled and disabled rule states
+- thresholds
+- time windows
+- action selection
+- severity selection
+- scope selection
 
-The result is an environment where teams can investigate, respond, and manage systems from one place without unnecessary tool switching or fragmented workflows.
+The rule system supports both single-trigger and grouped-trigger behavior. Operators can tune how a rule behaves by adjusting the trigger set, threshold, action, and severity, then enabling or disabling the rule as needed.
+
+From the `Threats` workspace, operators can:
+
+- review current prevention rules
+- open a rule editor to adjust thresholds, templates, actions, severity, and mode
+- create custom templates
+- update existing templates
+- remove templates
+
+The product also exposes a template library around the implemented rule types, so common prevention patterns can be loaded into the rule editor instead of being rebuilt from scratch each time.
+
+---
+
+## Threats Workspace
+
+The `Threats` workspace is where NyxGate brings together detections, prevention state, and containment controls.
+
+Operators can work across:
+
+- an IPS snapshot of prevented attacks, active rules, and current blocks
+- an attack dashboard with correlated attack sessions
+- a prevention rules view for live rule editing
+- blocked entity management for IPs and domains
+- host isolation controls for containment
+
+What the operator sees here is action-oriented:
+
+- correlated detections rather than isolated rows
+- current block inventory
+- rule tuning and template management
+- host isolation and restore actions
+- threat data cleanup for stored history when needed
+
+This makes `Threats` the main workspace for reviewing what was detected, what was blocked, which rules are active, and what response should happen next.
+
+---
+
+## Traffic and Monitoring
+
+NyxGate separates traffic analysis from general host monitoring so operators can choose the right lens for the task.
+
+### Traffic Explorer
+
+The `Traffic` workspace focuses on grouped traffic visibility and interpretation. Operators can review:
+
+- grouped traffic by host, process, and destination
+- throughput over the selected review window
+- top destinations and host ownership
+- process-driven traffic summaries
+- exceptions such as new destinations, unknown destinations, and traffic requiring review
+
+The page is designed to help operators answer practical questions such as:
+
+- which process is generating this traffic
+- which hosts are communicating with a destination
+- whether a grouped pattern looks expected or unusual
+
+### Monitoring
+
+The `Monitoring` workspace focuses on host telemetry and operational state across time windows. It provides:
+
+- fleet overview signals across the selected window
+- sortable host monitoring tables
+- CPU, memory, connection, and traffic filters
+- grouped traffic intelligence
+- anomaly tables
+- quick pivots into host investigation
+
+Together, `Traffic` and `Monitoring` give both network-centered and host-centered views of activity.
+
+---
+
+## Host Risk and Insights
+
+NyxGate includes two operator workflows for prioritization and review.
+
+### Host Risk
+
+The `Risk` workspace ranks hosts by a real risk model built from:
+
+- security detections
+- exposed services and other exposure signals
+- patch posture
+- reboot-required state
+- unusual outbound activity
+
+For each host, operators can see:
+
+- risk score
+- risk level
+- tags explaining why the host is ranked
+- patch posture summary
+- current workflow state
+- recommended actions such as patching, firewall review, investigation, or isolation
+
+### Insights
+
+The `Insights` workspace turns related detections, process activity, and network behavior into plain-language stories.
+
+Each story can include:
+
+- affected hosts
+- severity
+- status such as ongoing or contained
+- confidence
+- key steps describing what NyxGate saw
+- top evidence references
+- defensive actions already correlated into the story window
+
+This gives operators a narrative investigation surface for understanding related activity without reading a stream of disconnected events.
+
+---
+
+## Firewall Operations
+
+NyxGate includes a dedicated firewall workspace for host posture, exposure review, and reusable policy management.
+
+The `Firewall` workspace gives operators access to:
+
+- firewall coverage and host posture across the fleet
+- controller-wide firewall defaults and IPS posture
+- host-level firewall state
+- visible listening services reported by agents
+- allowed ports and deny rules reported by hosts
+- reusable firewall policy creation and editing
+- policy assignment and unassignment across hosts
+- remediation guidance for hosts with policy gaps or visible services
+
+NyxGate distinguishes between what a firewall allows and what a host is actually listening on. That difference is visible in the interface, which helps operators review true exposure instead of assuming the allow list tells the whole story.
+
+Operators can also run quick firewall actions and host isolation actions directly from this workspace while keeping the relevant host context visible.
+
+---
+
+## Patch Management
+
+NyxGate includes patch visibility and patch execution across managed hosts.
+
+The `Patching` workspace provides:
+
+- fleet patch overview
+- host patch status
+- outdated and critical update counts
+- reboot-required visibility
+- last scan timestamps
+- detailed package deltas on individual hosts
+- patch scan actions
+- apply-all update actions
+- apply-security-only actions
+- selected-package actions
+- reboot actions for hosts that require it
+
+For a focused host, operators can review the package list, inspect the latest patch result, and queue the next patch action directly from the same panel.
+
+This makes patching part of the same operational workflow as threat response and host investigation rather than a separate silo.
+
+---
+
+## Agent Lifecycle Management
+
+NyxGate includes a full `Agents` workspace for managed endpoint operations.
+
+From this workspace, operators can:
+
+- search and filter agent inventory
+- review status, OS, version, and last-seen information
+- generate enrollment tokens and installation commands
+- use Linux, Docker, or manual install flows for new agents
+- rename hosts
+- remotely upgrade agents
+- restart agents
+- revoke agents
+- remotely uninstall agents
+- isolate hosts
+- remove hosts from inventory
+- run bulk actions across selected hosts
+
+The install drawer generates token-based enrollment commands with configurable lifetime and enrollment limits, so onboarding can be controlled from the product interface.
+
+---
+
+## Remote Terminal
+
+NyxGate includes an audited terminal workspace for direct host access over the control plane.
+
+Operators with the right permissions can:
+
+- select an online host
+- open a shell session from the browser
+- use a live terminal interface
+- copy or download the terminal transcript
+- close the session from the interface
+
+This is intended for cases where operators need immediate host access while investigating or remediating an issue.
+
+---
+
+## Access Control and Setup
+
+NyxGate uses a locked bootstrap flow before the main application becomes available.
+
+On first access:
+
+1. the platform redirects the user to `/setup`
+2. an administrator account is created
+3. recovery keys are generated and must be acknowledged
+4. MFA setup is required before access is granted
+5. exactly 8 backup codes are generated during MFA activation
+
+Until setup is completed, the main application is not accessible.
+
+After the initial bootstrap, the authentication flow supports:
+
+- login by email or nickname
+- MFA challenge during sign-in when required
+- recovery-key-based password reset
+- profile-level MFA setup, disable, and backup code regeneration
+
+NyxGate also includes role-aware access across the platform, with dedicated user and role management inside `Settings`.
+
+---
+
+## Settings, Storage, and Audit
+
+The `Settings` workspace includes the following sections:
+
+- `General`
+- `Agent Lifecycle`
+- `Security`
+- `Storage & Retention`
+- `Users & Roles`
+- `Audit Logs`
+
+From these sections, operators can manage:
+
+- general platform settings
+- agent lifecycle defaults
+- MFA policy
+- retention settings for telemetry, flow history, alerts, firewall events, audit logs, and topology cache
+- storage thresholds and cleanup behavior
+- platform users and roles
+- password reset and account status actions
+- audit log filtering and purge actions
+
+NyxGate also includes storage visibility features such as:
+
+- storage overview
+- free space and warning signals
+- tracked data usage by category
+- growth rate projections
+- cleanup status
+
+---
+
+## Data Persistence
+
+NyxGate stores persistent platform state in:
+
+```text
+/opt/nyxgate/data
+```
+
+This persistent data includes platform state such as:
+
+- users and roles
+- MFA data and backup codes
+- prevention rules and rule templates
+- blocked entities and host isolation state
+- firewall policies and assignments
+- patch posture and package inventory
+- audit history
+- platform settings
+- retained telemetry and activity context
+
+The product is designed so operational data survives restart, upgrade, and rebuild when the persistent volume is preserved.
 
 ---
 
@@ -118,49 +418,11 @@ The result is an environment where teams can investigate, respond, and manage sy
 curl -sSL https://raw.githubusercontent.com/NyxCloudRO/NyxGate/main/install/install.sh | bash
 ```
 
----
-
-## Access
+After installation, access NyxGate at:
 
 ```text
 https://<server-ip>:8443
 ```
-
----
-
-## Initial Setup
-
-On first access, NyxGate redirects the operator to `/setup`.
-
-The initial setup flow includes:
-
-- admin account creation
-- mandatory MFA activation
-- generation of 8 backup codes
-
-The platform remains locked until setup is fully completed. This ensures the management environment is secured before normal platform access is available.
-
----
-
-## Data Persistence
-
-NyxGate stores persistent platform data in:
-
-```text
-/opt/nyxgate/data
-```
-
-This data survives restart, upgrade, and rebuild.
-
-Persistent platform data includes:
-
-- users
-- MFA data
-- backup codes
-- Prevention Rules
-- platform settings
-
-This model allows the platform to be upgraded and maintained without losing operational continuity or core security state.
 
 ---
 
@@ -172,30 +434,18 @@ curl -sSL https://raw.githubusercontent.com/NyxCloudRO/NyxGate/main/install/upgr
 
 ---
 
-## System Requirements
-
-- 2 CPU minimum
-- 4GB RAM recommended
-- Docker required
-
----
-
 ## Deployment Model
 
-NyxGate is deployed in Docker as a production-ready runtime with persistent storage attached to the platform data path.
+NyxGate is delivered as a Docker-based deployment with persistent storage mounted into the application runtime.
 
-The deployment model is built around:
+The production deployment model is built around:
 
-- Docker-based runtime delivery
-- an isolated runtime environment
-- persistent storage for long-lived platform state
-- production-ready deployment practices
+- an isolated container runtime
+- HTTPS access on port `8443`
+- persistent application data under `/opt/nyxgate/data`
+- repeatable install and upgrade flows
 
-This keeps installation straightforward while supporting repeatable operations, controlled upgrades, and stable data retention.
-
----
-
-## Production Image
+Production image:
 
 ```text
 nyxmael/nyxgate:1.0.0
@@ -203,16 +453,22 @@ nyxmael/nyxgate:1.0.0
 
 ---
 
+## System Requirements
+
+- 2 CPU minimum
+- 4 GB RAM recommended
+- Docker required
+
+---
+
 ## Philosophy
 
-NyxGate is built around a simple operational belief: security platforms should help teams see clearly, act decisively, and manage systems without unnecessary friction.
+NyxGate is designed around a practical operations model:
 
-Its philosophy centers on:
+- keep the fleet visible
+- reduce noisy, disconnected investigation work
+- expose clear operator actions where the evidence already is
+- treat security, endpoint state, patching, and response as connected workflows
+- give operators a product they can navigate quickly under pressure
 
-- clarity over complexity
-- operator-first design
-- a unified security approach
-- reducing noise and increasing visibility
-- practical security for real environments
-
-NyxGate aims to support real operators in real conditions by combining visibility, prevention, and control into a platform that stays focused on usefulness, speed, and confidence.
+The result is a platform focused on clarity, actionability, and operational control rather than raw data volume alone.
