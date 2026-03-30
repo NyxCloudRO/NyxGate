@@ -53,7 +53,7 @@ detect_ip() {
 
 ensure_prerequisites() {
   apt-get update
-  apt-get install -y ca-certificates curl tar gzip coreutils openssl
+  apt-get install -y ca-certificates curl tar gzip coreutils openssl python3
 }
 
 install_docker_if_missing() {
@@ -79,11 +79,32 @@ install_docker_if_missing() {
 }
 
 latest_release_version() {
-  curl -fsSL "${DOCKER_HUB_TAGS_URL}" \
-    | tr ',{}' '\n' \
-    | sed -n 's/^"name":"\([0-9][0-9.]*\)"$/\1/p' \
-    | sort -V \
-    | tail -n 1
+  python3 - "${DOCKER_HUB_TAGS_URL}" <<'PY'
+import json
+import re
+import sys
+import urllib.request
+
+url = sys.argv[1]
+tags = []
+
+while url:
+    with urllib.request.urlopen(url, timeout=20) as response:
+        data = json.load(response)
+    for row in data.get("results", []):
+        name = str(row.get("name", "")).strip()
+        if re.fullmatch(r"\d+(?:\.\d+)*", name):
+            tags.append(name)
+    url = data.get("next")
+
+if not tags:
+    sys.exit(1)
+
+def version_key(value: str):
+    return [int(part) for part in value.split(".")]
+
+print(sorted(set(tags), key=version_key)[-1])
+PY
 }
 
 current_release_version() {
