@@ -122,6 +122,7 @@ services:
     image: ${POSTGRES_IMAGE}
     container_name: nyxgate-postgres
     restart: unless-stopped
+    command: ["postgres", "-c", "listen_addresses=*"]
     env_file:
       - ${CONFIG_DIR}/nyxgate.env
       - ${SECRETS_DIR}/nyxgate.secrets.env
@@ -195,8 +196,10 @@ services:
 
 volumes:
   nyxgate-postgres-data:
+    external: true
     name: nyxgate-postgres-data
   nyxgate-redis-data:
+    external: true
     name: nyxgate-redis-data
 
 networks:
@@ -207,6 +210,7 @@ EOF
 
 migrate_legacy_postgres_volume() {
   docker volume create nyxgate-postgres-data >/dev/null
+  docker volume create nyxgate-redis-data >/dev/null
   for legacy_vol in nyxgate_pg deploy_nyxgate_pg; do
     if docker volume ls -q | grep -qx "${legacy_vol}"; then
       local target_count
@@ -231,6 +235,24 @@ set_env_value() {
     sed -i "s|^${key}=.*|${key}=${value}|" "${file}"
   else
     printf '%s=%s\n' "${key}" "${value}" >> "${file}"
+  fi
+}
+
+ensure_postgres_network_access() {
+  local pg_hba_file="${DATA_DIR}/postgres/pg_hba.conf"
+  if [[ -f "${pg_hba_file}" ]] && ! grep -q '172\.18\.0\.0/16' "${pg_hba_file}"; then
+    printf '\nhost all all 172.18.0.0/16 scram-sha-256\n' >> "${pg_hba_file}"
+  fi
+}
+
+ensure_cert_permissions() {
+  if [[ -f "${CERTS_DIR}/tls.crt" ]]; then
+    chown 10001:10001 "${CERTS_DIR}/tls.crt"
+    chmod 644 "${CERTS_DIR}/tls.crt"
+  fi
+  if [[ -f "${CERTS_DIR}/tls.key" ]]; then
+    chown 10001:10001 "${CERTS_DIR}/tls.key"
+    chmod 600 "${CERTS_DIR}/tls.key"
   fi
 }
 
@@ -351,6 +373,8 @@ EOF
   stop_legacy_container_if_needed
   migrate_legacy_postgres_volume
   migrate_legacy_embedded_data
+  ensure_postgres_network_access
+  ensure_cert_permissions
 
   echo "[upgrade] pulling published images..."
   docker compose -f "${COMPOSE_FILE}" pull

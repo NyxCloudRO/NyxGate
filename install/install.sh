@@ -155,6 +155,7 @@ services:
     image: ${POSTGRES_IMAGE}
     container_name: nyxgate-postgres
     restart: unless-stopped
+    command: ["postgres", "-c", "listen_addresses=*"]
     env_file:
       - ${CONFIG_DIR}/nyxgate.env
       - ${SECRETS_DIR}/nyxgate.secrets.env
@@ -228,8 +229,10 @@ services:
 
 volumes:
   nyxgate-postgres-data:
+    external: true
     name: nyxgate-postgres-data
   nyxgate-redis-data:
+    external: true
     name: nyxgate-redis-data
 
 networks:
@@ -240,6 +243,7 @@ EOF
 
 migrate_legacy_postgres_volume() {
   docker volume create nyxgate-postgres-data >/dev/null
+  docker volume create nyxgate-redis-data >/dev/null
   for legacy_vol in nyxgate_pg deploy_nyxgate_pg; do
     if docker volume ls -q | grep -qx "${legacy_vol}"; then
       local target_count
