@@ -6,11 +6,17 @@ CONFIG_DIR="${APP_ROOT}/config"
 CERTS_DIR="${APP_ROOT}/certs"
 SECRETS_DIR="${APP_ROOT}/secrets"
 DATA_DIR="${APP_ROOT}/data"
-BACKUP_DIR="${APP_ROOT}/backups"
 VERSION_FILE="${APP_ROOT}/.release-version"
 COMPOSE_FILE="${APP_ROOT}/docker-compose.yml"
 DOCKER_HUB_TAGS_URL="https://hub.docker.com/v2/namespaces/nyxmael/repositories/nyxgate/tags?page_size=100"
 APP_IMAGE_REPO="nyxmael/nyxgate"
+POSTGRES_IMAGE="postgres:15-alpine"
+REDIS_IMAGE="redis:7-alpine"
+LEGACY_CONTAINER_NAME="nyxgate"
+LEGACY_DATA_CONFIG_DIR="${DATA_DIR}/config"
+LEGACY_DATA_CERTS_DIR="${DATA_DIR}/certs"
+LEGACY_DATA_POSTGRES_DIR="${DATA_DIR}/postgres"
+LEGACY_DATA_REDIS_DIR="${DATA_DIR}/redis"
 
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
@@ -80,7 +86,7 @@ version_compare() {
 }
 
 ensure_layout() {
-  mkdir -p "${CONFIG_DIR}" "${CERTS_DIR}" "${SECRETS_DIR}" "${DATA_DIR}" "${BACKUP_DIR}"
+  mkdir -p "${CONFIG_DIR}" "${CERTS_DIR}" "${SECRETS_DIR}" "${DATA_DIR}"
 
   if [[ ! -f "${CONFIG_DIR}/nyxgate.env" ]]; then
     cat > "${CONFIG_DIR}/nyxgate.env" <<'EOF'
@@ -113,7 +119,7 @@ write_compose_file() {
   cat > "${COMPOSE_FILE}" <<EOF
 services:
   nyxgate-postgres:
-    image: postgres:16-alpine
+    image: ${POSTGRES_IMAGE}
     container_name: nyxgate-postgres
     restart: unless-stopped
     env_file:
@@ -133,7 +139,7 @@ services:
       start_period: 15s
 
   nyxgate-redis:
-    image: redis:7-alpine
+    image: ${REDIS_IMAGE}
     container_name: nyxgate-redis
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
@@ -217,42 +223,84 @@ migrate_legacy_postgres_volume() {
   done
 }
 
-create_backup() {
-  local ts stamp_dir
-  ts="$(date -u +%Y%m%dT%H%M%SZ)"
-  stamp_dir="${BACKUP_DIR}/nyxgate-backup-${ts}"
-  mkdir -p "${stamp_dir}"
-
-  if [[ -f "${CONFIG_DIR}/nyxgate.env" ]]; then
-    # shellcheck disable=SC1091
-    source "${CONFIG_DIR}/nyxgate.env"
-  fi
-
-  local db_name="${NYXGATE_DB_NAME:-nyxgate}"
-  local db_user="${NYXGATE_DB_USER:-nyxgate}"
-
-  echo "[backup] creating database dump..."
-  if docker compose -f "${COMPOSE_FILE}" ps --services --filter status=running | grep -qx "nyxgate-postgres"; then
-    docker compose -f "${COMPOSE_FILE}" exec -T nyxgate-postgres \
-      pg_dump -U "${db_user}" -d "${db_name}" -Fc > "${stamp_dir}/database.dump"
+set_env_value() {
+  local file="$1"
+  local key="$2"
+  local value="$3"
+  if grep -q "^${key}=" "${file}" 2>/dev/null; then
+    sed -i "s|^${key}=.*|${key}=${value}|" "${file}"
   else
-    : > "${stamp_dir}/database.dump"
+    printf '%s=%s\n' "${key}" "${value}" >> "${file}"
+  fi
+}
+
+legacy_standalone_container_exists() {
+  if ! docker ps -a --format '{{.Names}}' | grep -qx "${LEGACY_CONTAINER_NAME}"; then
+    return 1
+  fi
+  local compose_label
+  compose_label="$(docker inspect -f '{{ index .Config.Labels "com.docker.compose.project" }}' "${LEGACY_CONTAINER_NAME}" 2>/dev/null || true)"
+  [[ -z "${compose_label}" ]]
+}
+
+sync_legacy_secrets() {
+  if [[ -f "${LEGACY_DATA_CONFIG_DIR}/db_password" ]]; then
+    local db_password
+    db_password="$(tr -d '\r\n' < "${LEGACY_DATA_CONFIG_DIR}/db_password")"
+    if [[ -n "${db_password}" ]]; then
+      set_env_value "${CONFIG_DIR}/nyxgate.env" "NYXGATE_DB_PASSWORD" "${db_password}"
+      set_env_value "${CONFIG_DIR}/nyxgate.env" "POSTGRES_PASSWORD" "${db_password}"
+    fi
   fi
 
-  echo "[backup] archiving persistent data..."
-  tar -czf "${stamp_dir}/config.tgz" -C "${APP_ROOT}" config
-  tar -czf "${stamp_dir}/certs.tgz" -C "${APP_ROOT}" certs
-  tar -czf "${stamp_dir}/secrets.tgz" -C "${APP_ROOT}" secrets
-  tar -czf "${stamp_dir}/data.tgz" -C "${APP_ROOT}" data
-
-  cat > "${stamp_dir}/manifest.txt" <<EOF
-created_at=${ts}
-db_name=${db_name}
-db_user=${db_user}
-files=database.dump,config.tgz,certs.tgz,secrets.tgz,data.tgz
+  if [[ -f "${LEGACY_DATA_CONFIG_DIR}/jwt_secret" ]]; then
+    local jwt_secret
+    jwt_secret="$(tr -d '\r\n' < "${LEGACY_DATA_CONFIG_DIR}/jwt_secret")"
+    if [[ -n "${jwt_secret}" ]]; then
+      cat > "${SECRETS_DIR}/nyxgate.secrets.env" <<EOF
+NYXGATE_JWT_SECRET=${jwt_secret}
 EOF
+      chmod 600 "${SECRETS_DIR}/nyxgate.secrets.env"
+    fi
+  fi
 
-  echo "[backup] completed: ${stamp_dir}"
+  if [[ -d "${LEGACY_DATA_CERTS_DIR}" ]] && [[ -z "$(ls -A "${CERTS_DIR}" 2>/dev/null)" ]]; then
+    cp -a "${LEGACY_DATA_CERTS_DIR}/." "${CERTS_DIR}/"
+  fi
+}
+
+migrate_legacy_embedded_data() {
+  local pg_volume_empty redis_volume_empty
+
+  docker volume create nyxgate-postgres-data >/dev/null
+  docker volume create nyxgate-redis-data >/dev/null
+
+  pg_volume_empty="$(docker run --rm -v nyxgate-postgres-data:/to alpine:3.20 sh -c 'ls -A /to | wc -l')"
+  redis_volume_empty="$(docker run --rm -v nyxgate-redis-data:/to alpine:3.20 sh -c 'ls -A /to | wc -l')"
+
+  if [[ -d "${LEGACY_DATA_POSTGRES_DIR}" ]] && [[ -f "${LEGACY_DATA_POSTGRES_DIR}/PG_VERSION" ]] && [[ "${pg_volume_empty}" == "0" ]]; then
+    echo "[upgrade] migrating embedded postgres data into persistent volume..."
+    docker run --rm \
+      -v "${LEGACY_DATA_POSTGRES_DIR}":/from:ro \
+      -v nyxgate-postgres-data:/to \
+      alpine:3.20 sh -c 'cp -a /from/. /to/'
+  fi
+
+  if [[ -d "${LEGACY_DATA_REDIS_DIR}" ]] && [[ "${redis_volume_empty}" == "0" ]]; then
+    echo "[upgrade] migrating embedded redis data into persistent volume..."
+    docker run --rm \
+      -v "${LEGACY_DATA_REDIS_DIR}":/from:ro \
+      -v nyxgate-redis-data:/to \
+      alpine:3.20 sh -c 'cp -a /from/. /to/'
+  fi
+}
+
+stop_legacy_container_if_needed() {
+  if legacy_standalone_container_exists; then
+    echo "[upgrade] stopping legacy NyxGate container..."
+    docker stop "${LEGACY_CONTAINER_NAME}" >/dev/null || true
+    docker rm "${LEGACY_CONTAINER_NAME}" >/dev/null || true
+  fi
 }
 
 write_release_marker() {
@@ -299,8 +347,10 @@ EOF
   fi
 
   write_compose_file "${target_version}"
+  sync_legacy_secrets
+  stop_legacy_container_if_needed
   migrate_legacy_postgres_volume
-  create_backup
+  migrate_legacy_embedded_data
 
   echo "[upgrade] pulling published images..."
   docker compose -f "${COMPOSE_FILE}" pull

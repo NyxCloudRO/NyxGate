@@ -11,6 +11,8 @@ VERSION_FILE="${APP_ROOT}/.release-version"
 COMPOSE_FILE="${APP_ROOT}/docker-compose.yml"
 DOCKER_HUB_TAGS_URL="https://hub.docker.com/v2/namespaces/nyxmael/repositories/nyxgate/tags?page_size=100"
 APP_IMAGE_REPO="nyxmael/nyxgate"
+POSTGRES_IMAGE="postgres:15-alpine"
+REDIS_IMAGE="redis:7-alpine"
 
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
@@ -150,7 +152,7 @@ write_compose_file() {
   cat > "${COMPOSE_FILE}" <<EOF
 services:
   nyxgate-postgres:
-    image: postgres:16-alpine
+    image: ${POSTGRES_IMAGE}
     container_name: nyxgate-postgres
     restart: unless-stopped
     env_file:
@@ -170,7 +172,7 @@ services:
       start_period: 15s
 
   nyxgate-redis:
-    image: redis:7-alpine
+    image: ${REDIS_IMAGE}
     container_name: nyxgate-redis
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
