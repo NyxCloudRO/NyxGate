@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE="nyxmael/nyxgate:1.0.0"
-CONTAINER_NAME="nyxgate"
-DATA_DIR="/opt/nyxgate/data"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+DEPLOY_UPGRADE_SCRIPT="${REPO_ROOT}/deploy/upgrade.sh"
 
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
@@ -19,36 +19,28 @@ require_docker() {
   fi
 }
 
-ensure_paths() {
-  mkdir -p "/opt/nyxgate" "${DATA_DIR}"
+require_compose_upgrade() {
+  if [[ ! -x "${DEPLOY_UPGRADE_SCRIPT}" ]]; then
+    echo "Compose upgrade script not found at ${DEPLOY_UPGRADE_SCRIPT}." >&2
+    echo "Use the deploy workflow from a full NyxGate checkout so the existing database and Redis state stay attached." >&2
+    exit 1
+  fi
 }
 
 upgrade_nyxgate() {
-  docker pull "${IMAGE}"
-
-  if docker ps -a --format '{{.Names}}' | grep -Fxq "${CONTAINER_NAME}"; then
-    docker stop "${CONTAINER_NAME}" >/dev/null || true
-    docker rm "${CONTAINER_NAME}" >/dev/null || true
-  fi
-
-  docker run -d \
-    --name "${CONTAINER_NAME}" \
-    --restart unless-stopped \
-    -p 8443:8443 \
-    -v "${DATA_DIR}:/app/data" \
-    "${IMAGE}" >/dev/null
+  "${DEPLOY_UPGRADE_SCRIPT}"
 }
 
 main() {
   require_root
   require_docker
-  ensure_paths
+  require_compose_upgrade
   upgrade_nyxgate
 
   cat <<EOF
 ========================================
 NyxGate upgraded successfully
-Your persistent data remains intact.
+Persistent data was preserved through the compose upgrade path.
 ========================================
 EOF
 }

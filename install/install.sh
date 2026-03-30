@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE="nyxmael/nyxgate:1.0.0"
-CONTAINER_NAME="nyxgate"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+DEPLOY_UPGRADE_SCRIPT="${REPO_ROOT}/deploy/upgrade.sh"
 APP_ROOT="/opt/nyxgate"
-DATA_DIR="${APP_ROOT}/data"
 
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
@@ -31,18 +31,6 @@ require_supported_os() {
   esac
 }
 
-detect_ip() {
-  local ip
-  ip="$(ip route get 1.1.1.1 2>/dev/null | awk '/src/ {for (i=1; i<=NF; i++) if ($i == "src") {print $(i+1); exit}}')"
-  if [[ -z "${ip}" ]]; then
-    ip="$(hostname -I 2>/dev/null | awk '{print $1}')"
-  fi
-  if [[ -z "${ip}" ]]; then
-    ip="SERVER_IP"
-  fi
-  printf '%s\n' "${ip}"
-}
-
 install_docker_if_missing() {
   if command -v docker >/dev/null 2>&1; then
     return
@@ -66,40 +54,35 @@ install_docker_if_missing() {
   systemctl enable --now docker
 }
 
+require_compose_installer() {
+  if [[ ! -x "${DEPLOY_UPGRADE_SCRIPT}" ]]; then
+    echo "Compose installer not found at ${DEPLOY_UPGRADE_SCRIPT}." >&2
+    echo "Use the deploy workflow from a full NyxGate checkout so Postgres and Redis data are preserved." >&2
+    exit 1
+  fi
+}
+
 prepare_directories() {
-  mkdir -p "${APP_ROOT}" "${DATA_DIR}"
+  mkdir -p "${APP_ROOT}"
 }
 
 install_nyxgate() {
-  docker pull "${IMAGE}"
-
-  if docker ps -a --format '{{.Names}}' | grep -Fxq "${CONTAINER_NAME}"; then
-    docker rm -f "${CONTAINER_NAME}" >/dev/null
-  fi
-
-  docker run -d \
-    --name "${CONTAINER_NAME}" \
-    --restart unless-stopped \
-    -p 8443:8443 \
-    -v "${DATA_DIR}:/app/data" \
-    "${IMAGE}" >/dev/null
+  "${DEPLOY_UPGRADE_SCRIPT}"
 }
 
 main() {
   require_root
   require_supported_os
   install_docker_if_missing
+  require_compose_installer
   prepare_directories
   install_nyxgate
-
-  local server_ip
-  server_ip="$(detect_ip)"
 
   cat <<EOF
 ========================================
 NyxGate installed successfully
 Access your panel at:
-https://${server_ip}:8443
+https://SERVER_IP:8443
 ========================================
 EOF
 }
