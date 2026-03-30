@@ -521,8 +521,8 @@ Your support helps maintain and improve the platform.
 For more information, updates, and future developments:
 
 <a href="https://nyxcloud.ro/NyxGate/">
-  <img src="https://img.shields.io/badge/nyxcloud.ro%2FNyxGate-NyxGate%20Website-0ea5e9?style=for-the-badge&logo=googlechrome&logoColor=white" alt="NyxGate Website" />
+  <img src="https://img.shields.io/badge/NyxGate%20Website-0ea5e9?style=for-the-badge&logo=googlechrome&logoColor=white" alt="NyxGate Website" />
 </a>
 <a href="https://nyxcloud.ro/">
-  <img src="https://img.shields.io/badge/nyxcloud.ro-NyxCloud-2563eb?style=for-the-badge&logo=cloudflare&logoColor=white" alt="NyxCloud" />
+  <img src="https://img.shields.io/badge/NyxCloud-2563eb?style=for-the-badge&logo=cloudflare&logoColor=white" alt="NyxCloud" />
 </a>
