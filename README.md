@@ -390,13 +390,18 @@ NyxGate also includes storage visibility features such as:
 
 ## Data Persistence
 
-NyxGate stores persistent platform state in:
+NyxGate preserves persistent platform state across:
 
 ```text
 /opt/nyxgate/data
+/opt/nyxgate/config
+/opt/nyxgate/certs
+/opt/nyxgate/secrets
+docker volume: nyxgate-postgres-data
+docker volume: nyxgate-redis-data
 ```
 
-This persistent data includes platform state such as:
+This persistent state includes platform data such as:
 
 - users and roles
 - MFA data and backup codes
@@ -408,7 +413,7 @@ This persistent data includes platform state such as:
 - platform settings
 - retained telemetry and activity context
 
-The product is designed so operational data survives restart, upgrade, and rebuild when the persistent volume is preserved.
+The product is designed so operational data survives restart, upgrade, and rebuild when these paths and volumes are preserved.
 
 ---
 
@@ -434,6 +439,8 @@ curl -sSL https://raw.githubusercontent.com/NyxCloudRO/NyxGate/main/install/upgr
 
 The published upgrade script checks the latest NyxGate release on Docker Hub, compares it with the installed release, and only starts the upgrade when a newer published release is available.
 
+For legacy `1.0.0` deployments, the first upgrade also migrates the embedded PostgreSQL and Redis data into persistent Docker volumes without creating a full archive of `/opt/nyxgate/data`.
+
 ---
 
 ## Deployment Model
@@ -444,7 +451,8 @@ The production deployment model is built around:
 
 - an isolated container runtime
 - HTTPS access on port `8443`
-- persistent application data under `/opt/nyxgate/data`
+- persistent platform files under `/opt/nyxgate`
+- persistent Docker volumes for PostgreSQL and Redis
 - repeatable install and upgrade flows
 
 Published release image:
