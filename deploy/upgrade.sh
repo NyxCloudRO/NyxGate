@@ -10,18 +10,7 @@ CERTS_DIR="${ROOT_DIR}/certs"
 SECRETS_DIR="${ROOT_DIR}/secrets"
 DATA_DIR="${ROOT_DIR}/data"
 BACKUP_SCRIPT="${SCRIPT_DIR}/backup.sh"
-PRUNE_SCRIPT="${SCRIPT_DIR}/docker-prune.sh"
-LOCAL_PRUNE_SCRIPT="${SCRIPT_DIR}/prune-local-artifacts.sh"
 PREFLIGHT_SCRIPT="${SCRIPT_DIR}/preflight.sh"
-
-cleanup() {
-  echo "[upgrade] pruning dangling images and unused build cache..."
-  "${PRUNE_SCRIPT}" || true
-
-  echo "[upgrade] pruning orphaned local build artifacts..."
-  "${LOCAL_PRUNE_SCRIPT}" || true
-}
-trap cleanup EXIT
 
 mkdir -p "${CONFIG_DIR}" "${CERTS_DIR}" "${SECRETS_DIR}" "${DATA_DIR}" "${ROOT_DIR}/backups"
 
@@ -52,6 +41,7 @@ EOF
 fi
 
 docker volume create nyxgate-postgres-data >/dev/null
+docker volume create nyxgate-redis-data >/dev/null
 for LEGACY_VOL in nyxgate_pg deploy_nyxgate_pg; do
   if docker volume ls -q | grep -qx "${LEGACY_VOL}"; then
     TARGET_COUNT="$(docker run --rm -v nyxgate-postgres-data:/to alpine:3.20 sh -c 'ls -A /to | wc -l')"
