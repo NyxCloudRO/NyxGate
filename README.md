@@ -31,7 +31,7 @@ NyxGate is organized around a set of operator-facing workspaces:
 - `Insights` for plain-language threat narratives built from related activity
 - `Firewall` for exposure review, policy management, and host firewall actions
 - `Patching` for patch status, package deltas, update execution, and reboot actions
-- `Terminal` for audited remote shell access to online hosts
+- `Terminal` for audited remote terminal access to online hosts
 - `Settings` for platform configuration, retention controls, users, roles, and audit review
 
 This means "endpoint management" in NyxGate is not limited to inventory. It includes enrolling hosts, observing their operational state, applying security policy, patching them, isolating them when necessary, and opening a remote shell session when direct investigation is required.
@@ -520,4 +520,9 @@ Your support helps maintain and improve the platform.
 
 For more information, updates, and future developments:
 
-[![NyxCloud](https://img.shields.io/badge/Visit-NyxCloud-blue?style=for-the-badge&logo=cloudflare)](https://nyxcloud.ro/)
+<a href="https://nyxcloud.ro/NyxGate/" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Open-NyxGate%20Website-0ea5e9?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Open NyxGate Website" />
+</a>
+<a href="https://nyxcloud.ro/" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Open-NyxCloud-2563eb?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Open NyxCloud" />
+</a>
