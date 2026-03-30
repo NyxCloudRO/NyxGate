@@ -432,6 +432,8 @@ https://<server-ip>:8443
 curl -sSL https://raw.githubusercontent.com/NyxCloudRO/NyxGate/main/install/upgrade.sh | bash
 ```
 
+The published upgrade script checks the latest NyxGate release on Docker Hub, compares it with the installed release, and only starts the upgrade when a newer published release is available.
+
 ---
 
 ## Deployment Model
@@ -445,10 +447,10 @@ The production deployment model is built around:
 - persistent application data under `/opt/nyxgate/data`
 - repeatable install and upgrade flows
 
-Production image:
+Published release image:
 
 ```text
-nyxmael/nyxgate:1.0.0
+nyxmael/nyxgate:<release-tag>
 ```
 
 ---
