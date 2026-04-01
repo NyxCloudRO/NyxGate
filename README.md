@@ -17,6 +17,94 @@ The platform is designed so an operator can move from fleet overview, to a suspi
 
 ---
 
+## First Install
+
+```bash
+curl -sSL https://raw.githubusercontent.com/NyxCloudRO/NyxGate/main/install/install.sh | bash
+```
+
+After installation, access NyxGate at:
+
+```text
+https://<server-ip>:8443
+```
+
+---
+
+## Upgrade
+
+```bash
+curl -sSL https://raw.githubusercontent.com/NyxCloudRO/NyxGate/main/install/upgrade.sh | bash
+```
+
+The published upgrade script checks the latest NyxGate release on Docker Hub, compares it with the installed release, and only starts the upgrade when a newer published release is available.
+
+For legacy `1.0.0` deployments, the first upgrade also migrates the embedded PostgreSQL and Redis data into persistent Docker volumes without creating a full archive of `/opt/nyxgate/data`.
+
+---
+
+## Deployment Model
+
+NyxGate is delivered as a Docker-based deployment with persistent storage mounted into the application runtime.
+
+The production deployment model is built around:
+
+- an isolated container runtime
+- HTTPS access on port `8443`
+- persistent platform files under `/opt/nyxgate`
+- persistent Docker volumes for PostgreSQL and Redis
+- repeatable install and upgrade flows
+
+Required controller port exposure:
+
+- `8443/tcp` must be open for the NyxGate web UI, agent check-ins, API access, downloads, and WebSocket sessions
+- `22/tcp` is optional and only needed if you administer the controller VM directly over SSH
+- `5432/tcp` is PostgreSQL and should remain internal-only
+- `6379/tcp` is Redis and should remain internal-only
+- `9443/tcp` is the internal controller API listener used behind the bundled Nginx proxy in split deployments and should remain internal-only
+
+Published release image:
+
+```text
+nyxmael/nyxgate:<release-tag>
+```
+
+---
+
+## Supported Distributions
+
+NyxGate has been tested and is supported on the following systems:
+
+### Ubuntu
+
+- Ubuntu 22.04.5 LTS
+- Ubuntu 24.04.4 LTS
+- Ubuntu 25.04
+
+### Debian
+
+- Debian GNU/Linux 12 (bookworm)
+- Debian GNU/Linux 13 (trixie)
+
+### RHEL
+
+- RHEL 10
+
+---
+
+## System Requirements
+
+- 2 CPU minimum
+- 4 GB RAM recommended
+- 20 GB disk minimum for the controller
+- 40 GB disk recommended for production use with retained telemetry, logs, audit history, PostgreSQL, and Redis data
+- SSD-backed storage recommended for better database and retention performance
+- Docker required
+
+Disk usage will grow with host count, telemetry retention, audit history, and patch or firewall activity, so larger fleets should provision additional storage beyond the baseline above.
+
+---
+
 ## What NyxGate Covers
 
 NyxGate is organized around a set of operator-facing workspaces:
@@ -414,81 +502,6 @@ This persistent state includes platform data such as:
 - retained telemetry and activity context
 
 The product is designed so operational data survives restart, upgrade, and rebuild when these paths and volumes are preserved.
-
----
-
-## First Install
-
-```bash
-curl -sSL https://raw.githubusercontent.com/NyxCloudRO/NyxGate/main/install/install.sh | bash
-```
-
-After installation, access NyxGate at:
-
-```text
-https://<server-ip>:8443
-```
-
----
-
-## Upgrade
-
-```bash
-curl -sSL https://raw.githubusercontent.com/NyxCloudRO/NyxGate/main/install/upgrade.sh | bash
-```
-
-The published upgrade script checks the latest NyxGate release on Docker Hub, compares it with the installed release, and only starts the upgrade when a newer published release is available.
-
-For legacy `1.0.0` deployments, the first upgrade also migrates the embedded PostgreSQL and Redis data into persistent Docker volumes without creating a full archive of `/opt/nyxgate/data`.
-
----
-
-## Deployment Model
-
-NyxGate is delivered as a Docker-based deployment with persistent storage mounted into the application runtime.
-
-The production deployment model is built around:
-
-- an isolated container runtime
-- HTTPS access on port `8443`
-- persistent platform files under `/opt/nyxgate`
-- persistent Docker volumes for PostgreSQL and Redis
-- repeatable install and upgrade flows
-
-Published release image:
-
-```text
-nyxmael/nyxgate:<release-tag>
-```
-
----
-
-## Supported Distributions
-
-NyxGate has been tested and is supported on the following systems:
-
-### Ubuntu
-
-- Ubuntu 22.04.5 LTS
-- Ubuntu 24.04.4 LTS
-- Ubuntu 25.04
-
-### Debian
-
-- Debian GNU/Linux 12 (bookworm)
-- Debian GNU/Linux 13 (trixie)
-
-### RHEL
-
-- RHEL 10
-
----
-
-## System Requirements
-
-- 2 CPU minimum
-- 4 GB RAM recommended
-- Docker required
 
 ---
 
