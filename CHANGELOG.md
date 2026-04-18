@@ -2,10 +2,10 @@
 
 ## v1.0.2
 
-- Overview exposure cards now open the `Firewall` workspace instead of `Risk`
-- Restoring host access no longer causes another host to appear isolated automatically
-- Remote terminal `sudo` access works again on hosts without a native `sudo` package
-- Remote terminal sessions feel faster and more responsive
+- Overview exposure cards now open the `Firewall` workspace, where exposed services can be reviewed and acted on directly
+- Restoring host access behaves correctly and no longer causes another host to appear isolated
+- Remote terminal access works more reliably across supported hosts, including elevated shell use
+- Remote terminal sessions feel faster and more responsive during everyday command work
 
 ## v1.0.1
 

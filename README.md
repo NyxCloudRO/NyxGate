@@ -6,8 +6,6 @@ NyxGate is a unified security and endpoint management platform that combines hos
 
 Current platform release: `1.0.2`
 
-Current bundled agent build: `0.4.109`
-
 Published fresh-install image:
 
 ```text
@@ -95,14 +93,12 @@ NyxGate includes browser-based audited shell access for online hosts:
 
 ## 1.0.2 Highlights
 
-Release `1.0.2` includes the platform version bump plus the latest controller and agent fixes currently shipping with the Docker image:
+Release `1.0.2` focuses on a cleaner day-to-day operator experience across Overview, host containment, and remote terminal access:
 
-- platform metadata and dashboard footer updated to `v1.0.2`
-- overview exposure workflow now pivots into `Firewall` instead of `Risk`
-- host isolation state now follows real agent acknowledgements instead of queued intent, which prevents ghost isolation records
-- remote terminal `sudo` compatibility restored for hosts without a native `sudo` package
-- remote terminal responsiveness improved by tightening the agent-side warning filter and removing client-side terminal scroll delay
-- bundled agent release updated to `0.4.109`
+- Overview exposure cards now take you to `Firewall`, which is the right place to review and act on exposed services
+- Restoring host access behaves correctly and no longer causes another host to show up as isolated
+- Remote terminal access works more reliably across supported hosts, including elevated shell use
+- Remote terminal sessions feel faster and more responsive during everyday command work
 
 See [CHANGELOG.md](/root/NyxGate/CHANGELOG.md) for the tracked platform release notes.
 
