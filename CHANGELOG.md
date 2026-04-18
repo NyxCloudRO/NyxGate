@@ -2,14 +2,10 @@
 
 ## v1.0.2
 
-- Bump the platform release metadata to `1.0.2`
-- Update the dashboard footer to display `v1.0.2`
-- Route overview exposure pivots into the `Firewall` workspace instead of `Risk`
-- Fix host isolation state handling so containment now follows real agent acknowledgements instead of queued intent
-- Prevent stale or ignored isolate commands from leaving ghost active isolation records
-- Restore remote terminal `sudo` compatibility on hosts that do not have a native `sudo` package installed
-- Improve remote terminal responsiveness by tightening the agent-side sudo warning filter and removing client-side terminal scroll delay
-- Roll the bundled agent release forward to `0.4.109`
+- Overview exposure cards now open the `Firewall` workspace instead of `Risk`
+- Restoring host access no longer causes another host to appear isolated automatically
+- Remote terminal `sudo` access works again on hosts without a native `sudo` package
+- Remote terminal sessions feel faster and more responsive
 
 ## v1.0.1
 
