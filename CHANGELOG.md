@@ -1,5 +1,12 @@
 # NyxGate Changelog
 
+## v1.0.3
+
+- Added a new `Community` action under `Support NyxGate` in the sidebar footer
+- The `Community` shortcut opens `https://community.nyxcloud.ro/` in a new browser tab
+- Styled the new community shortcut with a green treatment so it is visually distinct from the support action
+- Carried forward the `1.0.2` operator workflow improvements for `Firewall` routing, host restore behavior, and remote terminal reliability
+
 ## v1.0.2
 
 - Overview exposure cards now open the `Firewall` workspace, where exposed services can be reviewed and acted on directly
