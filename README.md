@@ -4,12 +4,12 @@ NyxGate is a unified security and endpoint management platform that combines hos
 
 ## Release
 
-Current platform release: `1.0.2`
+Current platform release: `1.0.3`
 
 Published fresh-install image:
 
 ```text
-nyxmael/nyxgate:1.0.2
+nyxmael/nyxgate:1.0.3
 ```
 
 ## What NyxGate Includes
@@ -91,16 +91,16 @@ NyxGate includes browser-based audited shell access for online hosts:
 - operator-scoped session ownership
 - recent terminal fixes for `sudo` compatibility and lower-latency command rendering
 
-## 1.0.2 Highlights
+## 1.0.3 Highlights
 
-Release `1.0.2` focuses on a cleaner day-to-day operator experience across Overview, host containment, and remote terminal access:
+Release `1.0.3` adds a faster route from the NyxGate sidebar into the public support community while keeping the operator shell and workspace flow intact:
 
-- Overview exposure cards now take you to `Firewall`, which is the right place to review and act on exposed services
-- Restoring host access behaves correctly and no longer causes another host to show up as isolated
-- Remote terminal access works more reliably across supported hosts, including elevated shell use
-- Remote terminal sessions feel faster and more responsive during everyday command work
+- A new `Community` shortcut now sits under `Support NyxGate` in the sidebar footer
+- The `Community` entry opens `https://community.nyxcloud.ro/` directly in a new browser tab
+- The new support-community action uses a green visual treatment so it stays distinct from the in-product support action
+- The release keeps the recent `Firewall` routing, host restore fix, and terminal reliability improvements from `1.0.2`
 
-See [CHANGELOG.md](/root/NyxGate/CHANGELOG.md) for the tracked platform release notes.
+See [CHANGELOG.md](/CHANGELOG.md) for the tracked platform release notes.
 
 ## Access Control and Bootstrap
 
@@ -163,7 +163,7 @@ The installer:
 If you want the image directly:
 
 ```bash
-docker pull nyxmael/nyxgate:1.0.2
+docker pull nyxmael/nyxgate:1.0.3
 ```
 
 ## Upgrade
@@ -185,9 +185,9 @@ The upgrade script:
 NyxGate has two Docker-oriented deployment paths in this repository:
 
 - fresh install / published runtime:
-  uses the single-image runtime built from [Production/Dockerfile](/root/NyxGate/Production/Dockerfile) and published as `nyxmael/nyxgate:<release-tag>`
+  uses the single-image runtime built from [Production/Dockerfile](/Production/Dockerfile) and published as `nyxmael/nyxgate:<release-tag>`
 - local development:
-  uses the split-stack compose topology in [deploy/docker-compose.yml](/root/NyxGate/deploy/docker-compose.yml)
+  uses the split-stack compose topology in [deploy/docker-compose.yml](/deploy/docker-compose.yml)
 
 For published releases, the runtime model is:
 
